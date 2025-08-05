@@ -1,0 +1,10 @@
+beautifulsoup4
+Django
+djangorestframework
+numpy
+pandas
+Requests
+scikit_learn
+yfinance
+django-cors-headers
+lxml

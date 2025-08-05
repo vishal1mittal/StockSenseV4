@@ -1,0 +1,379 @@
+{
+    "symbol": "AAPL",
+    "companyName": "Apple Inc.",
+    "overview": {
+        "price": 175.43,
+        "change": 2.34,
+        "changePercent": 1.35,
+        "volume": "64.2M",
+        "marketCap": "2.68T",
+        "peRatio": 28.45,
+        "dayRange": "172.80 - 176.90"
+    },
+    "historicalPerformance": {
+        "dailyData": [
+            { "date": "2024-01-29", "price": 174.62, "volume": 69701175 },
+            { "date": "2024-01-30", "price": 174.37, "volume": 70144359 },
+            { "date": "2024-01-31", "price": 175.85, "volume": 69983558 },
+            { "date": "2024-02-01", "price": 174.95, "volume": 72938662 },
+            { "date": "2024-02-02", "price": 173.06, "volume": 70812848 },
+            { "date": "2024-02-05", "price": 173.9, "volume": 68705350 },
+            { "date": "2024-02-06", "price": 174.96, "volume": 66378079 },
+            { "date": "2024-02-07", "price": 175.8, "volume": 68250298 },
+            { "date": "2024-02-08", "price": 173.81, "volume": 65915715 },
+            { "date": "2024-02-09", "price": 172.01, "volume": 63582069 },
+            { "date": "2024-02-12", "price": 171.92, "volume": 64830050 },
+            { "date": "2024-02-13", "price": 172.57, "volume": 63110461 },
+            { "date": "2024-02-14", "price": 173.51, "volume": 63690608 },
+            { "date": "2024-02-15", "price": 173.6, "volume": 60972156 },
+            { "date": "2024-02-16", "price": 175.23, "volume": 59241437 },
+            { "date": "2024-02-19", "price": 175.08, "volume": 62035379 },
+            { "date": "2024-02-20", "price": 173.4, "volume": 64009584 },
+            { "date": "2024-02-21", "price": 173.24, "volume": 61134629 },
+            { "date": "2024-02-22", "price": 174.5, "volume": 62680294 },
+            { "date": "2024-02-23", "price": 173.6, "volume": 64670032 },
+            { "date": "2024-02-26", "price": 174.84, "volume": 63310077 },
+            { "date": "2024-02-27", "price": 174.13, "volume": 65728461 },
+            { "date": "2024-02-28", "price": 176.03, "volume": 68479578 },
+            { "date": "2024-02-29", "price": 177.27, "volume": 69447401 },
+            { "date": "2024-03-01", "price": 177.22, "volume": 68225447 },
+            { "date": "2024-03-04", "price": 178.15, "volume": 66819602 },
+            { "date": "2024-03-05", "price": 178.4, "volume": 66717337 },
+            { "date": "2024-03-06", "price": 179.04, "volume": 69389824 },
+            { "date": "2024-03-07", "price": 179.0, "volume": 71604330 },
+            { "date": "2024-03-08", "price": 179.56, "volume": 69433019 },
+            { "date": "2024-03-11", "price": 179.74, "volume": 70729560 },
+            { "date": "2024-03-12", "price": 177.99, "volume": 68551873 },
+            { "date": "2024-03-13", "price": 176.46, "volume": 67769546 },
+            { "date": "2024-03-14", "price": 175.26, "volume": 69117988 },
+            { "date": "2024-03-15", "price": 174.87, "volume": 66528532 },
+            { "date": "2024-03-18", "price": 175.94, "volume": 66773026 },
+            { "date": "2024-03-19", "price": 176.56, "volume": 67999219 },
+            { "date": "2024-03-20", "price": 177.0, "volume": 70991352 },
+            { "date": "2024-03-21", "price": 176.87, "volume": 68243074 },
+            { "date": "2024-03-22", "price": 175.03, "volume": 68434998 },
+            { "date": "2024-03-25", "price": 174.33, "volume": 69579951 },
+            { "date": "2024-03-26", "price": 175.63, "volume": 68782297 },
+            { "date": "2024-03-27", "price": 174.98, "volume": 67022066 },
+            { "date": "2024-03-28", "price": 176.79, "volume": 64472889 },
+            { "date": "2024-03-29", "price": 176.01, "volume": 65886002 },
+            { "date": "2024-04-01", "price": 177.53, "volume": 68803335 },
+            { "date": "2024-04-02", "price": 177.72, "volume": 67649240 },
+            { "date": "2024-04-03", "price": 178.17, "volume": 64945807 },
+            { "date": "2024-04-04", "price": 177.12, "volume": 66975374 },
+            { "date": "2024-04-05", "price": 175.8, "volume": 66260126 },
+            { "date": "2024-04-08", "price": 173.91, "volume": 68681239 },
+            { "date": "2024-04-09", "price": 172.41, "volume": 68244654 },
+            { "date": "2024-04-10", "price": 170.84, "volume": 66900458 },
+            { "date": "2024-04-11", "price": 170.77, "volume": 63994171 },
+            { "date": "2024-04-12", "price": 172.48, "volume": 62695799 },
+            { "date": "2024-04-15", "price": 170.82, "volume": 60229868 },
+            { "date": "2024-04-16", "price": 169.73, "volume": 57483155 },
+            { "date": "2024-04-17", "price": 168.6, "volume": 57302628 },
+            { "date": "2024-04-18", "price": 168.3, "volume": 54575698 },
+            { "date": "2024-04-19", "price": 169.14, "volume": 54734978 },
+            { "date": "2024-04-22", "price": 168.85, "volume": 55267093 },
+            { "date": "2024-04-23", "price": 169.7, "volume": 55166206 },
+            { "date": "2024-04-24", "price": 171.31, "volume": 56597123 },
+            { "date": "2024-04-25", "price": 170.92, "volume": 53617848 },
+            { "date": "2024-04-26", "price": 169.3, "volume": 51033751 },
+            { "date": "2024-04-29", "price": 170.9, "volume": 50923152 },
+            { "date": "2024-04-30", "price": 172.11, "volume": 52237951 },
+            { "date": "2024-05-01", "price": 170.26, "volume": 49347821 },
+            { "date": "2024-05-02", "price": 171.71, "volume": 51870695 },
+            { "date": "2024-05-03", "price": 173.1, "volume": 50464258 },
+            { "date": "2024-05-06", "price": 172.08, "volume": 51450474 },
+            { "date": "2024-05-07", "price": 173.4, "volume": 53515504 },
+            { "date": "2024-05-08", "price": 171.98, "volume": 53650943 },
+            { "date": "2024-05-09", "price": 171.93, "volume": 50950010 },
+            { "date": "2024-05-10", "price": 172.0, "volume": 49978087 },
+            { "date": "2024-05-13", "price": 172.08, "volume": 49846641 },
+            { "date": "2024-05-14", "price": 172.41, "volume": 49811442 },
+            { "date": "2024-05-15", "price": 171.56, "volume": 48281344 },
+            { "date": "2024-05-16", "price": 170.55, "volume": 49672924 },
+            { "date": "2024-05-17", "price": 168.56, "volume": 48376106 },
+            { "date": "2024-05-20", "price": 167.61, "volume": 50102578 },
+            { "date": "2024-05-21", "price": 165.8, "volume": 48674475 },
+            { "date": "2024-05-22", "price": 166.83, "volume": 50460769 },
+            { "date": "2024-05-23", "price": 165.41, "volume": 47711690 },
+            { "date": "2024-05-24", "price": 167.27, "volume": 47246133 },
+            { "date": "2024-05-27", "price": 167.58, "volume": 44550203 },
+            { "date": "2024-05-28", "price": 166.87, "volume": 45336555 },
+            { "date": "2024-05-29", "price": 167.0, "volume": 46344808 },
+            { "date": "2024-05-30", "price": 168.56, "volume": 45449755 },
+            { "date": "2024-05-31", "price": 169.66, "volume": 47553518 },
+            { "date": "2024-06-03", "price": 169.08, "volume": 47032611 },
+            { "date": "2024-06-04", "price": 168.46, "volume": 49531463 },
+            { "date": "2024-06-05", "price": 169.35, "volume": 51424192 },
+            { "date": "2024-06-06", "price": 168.8, "volume": 52541764 },
+            { "date": "2024-06-07", "price": 168.27, "volume": 49662432 },
+            { "date": "2024-06-10", "price": 169.98, "volume": 48591474 },
+            { "date": "2024-06-11", "price": 170.95, "volume": 49710682 },
+            { "date": "2024-06-12", "price": 170.01, "volume": 49221423 },
+            { "date": "2024-06-13", "price": 169.93, "volume": 46578679 },
+            { "date": "2024-06-14", "price": 171.08, "volume": 44597070 }
+        ],
+        "performance": {
+            "1d": 1.35,
+            "1w": 2.89,
+            "1m": 6.22,
+            "3m": 8.45,
+            "1y": 12.67
+        }
+    },
+    "riskAnalysis": {
+        "riskScore": 6.8,
+        "volatility": 24.5,
+        "beta": 1.2,
+        "sharpeRatio": 1.45,
+        "maxDrawdown": 15.2,
+        "var95": 8.3
+    },
+    "technicalLevels": {
+        "currentPrice": 175.43,
+        "dailyLevels": {
+            "support": [172.5, 170.25, 168.8],
+            "resistance": [178.9, 181.25, 184.5]
+        },
+        "weeklyLevels": {
+            "support": [165.0, 160.5, 155.75],
+            "resistance": [185.0, 190.25, 195.5]
+        },
+        "indicators": {
+            "rsi": 68.5,
+            "macd": "Bullish",
+            "trend": "Upward"
+        }
+    },
+    "aiPredictions": {
+        "monthlyPredictions": [
+            {
+                "date": "2024-01-27",
+                "predictedPrice": 178.5,
+                "confidence": 78,
+                "direction": "up"
+            },
+            {
+                "date": "2024-01-28",
+                "predictedPrice": 179.2,
+                "confidence": 75,
+                "direction": "up"
+            },
+            {
+                "date": "2024-01-29",
+                "predictedPrice": 177.8,
+                "confidence": 72,
+                "direction": "down"
+            },
+            {
+                "date": "2024-01-30",
+                "predictedPrice": 180.1,
+                "confidence": 70,
+                "direction": "up"
+            },
+            {
+                "date": "2024-01-31",
+                "predictedPrice": 182.3,
+                "confidence": 68,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-01",
+                "predictedPrice": 181.9,
+                "confidence": 74,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-02",
+                "predictedPrice": 183.5,
+                "confidence": 72,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-05",
+                "predictedPrice": 184.2,
+                "confidence": 69,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-06",
+                "predictedPrice": 182.8,
+                "confidence": 71,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-07",
+                "predictedPrice": 185.1,
+                "confidence": 66,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-08",
+                "predictedPrice": 186.5,
+                "confidence": 63,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-09",
+                "predictedPrice": 184.9,
+                "confidence": 67,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-12",
+                "predictedPrice": 187.2,
+                "confidence": 65,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-13",
+                "predictedPrice": 188.8,
+                "confidence": 62,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-14",
+                "predictedPrice": 186.7,
+                "confidence": 69,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-15",
+                "predictedPrice": 189.4,
+                "confidence": 61,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-16",
+                "predictedPrice": 190.2,
+                "confidence": 58,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-20",
+                "predictedPrice": 188.6,
+                "confidence": 64,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-21",
+                "predictedPrice": 191.1,
+                "confidence": 57,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-22",
+                "predictedPrice": 192.5,
+                "confidence": 55,
+                "direction": "up"
+            },
+            {
+                "date": "2024-02-23",
+                "predictedPrice": 190.8,
+                "confidence": 60,
+                "direction": "down"
+            },
+            {
+                "date": "2024-02-26",
+                "predictedPrice": 185.3,
+                "confidence": 68,
+                "direction": "down"
+            }
+        ],
+        "summary": {
+            "nextDayPrediction": {
+                "direction": "up",
+                "confidence": 78,
+                "targetPrice": 178.5,
+                "reasoning": "Strong technical momentum with positive earnings sentiment"
+            },
+            "weeklyOutlook": {
+                "direction": "up",
+                "confidence": 65,
+                "targetRange": "175-182",
+                "keyFactors": [
+                    "Earnings beat",
+                    "Technical breakout",
+                    "Sector rotation"
+                ]
+            },
+            "riskFactors": [
+                "Market volatility ahead of Fed meeting",
+                "High valuation metrics",
+                "Seasonal trading patterns"
+            ]
+        }
+    },
+    "news": [
+        {
+            "id": 1,
+            "title": "AAPL Reports Strong Q4 Earnings",
+            "summary": "Company exceeds analyst expectations with robust revenue growth and improved margins.",
+            "time": "2 hours ago",
+            "source": "Financial Times",
+            "sentiment": "positive"
+        },
+        {
+            "id": 2,
+            "title": "Market Analysis: Tech Sector Outlook",
+            "summary": "Analysts remain bullish on technology stocks despite recent market volatility.",
+            "time": "4 hours ago",
+            "source": "Reuters",
+            "sentiment": "neutral"
+        },
+        {
+            "id": 3,
+            "title": "Regulatory Update Impacts Sector",
+            "summary": "New regulations may affect operational costs but long-term outlook remains positive.",
+            "time": "6 hours ago",
+            "source": "Bloomberg",
+            "sentiment": "negative"
+        }
+    ],
+    "financialDocuments": {
+        "keyMetrics": [
+            { "label": "Revenue (TTM)", "value": "$394.3B", "change": "+2.8%" },
+            {
+                "label": "Net Income (TTM)",
+                "value": "$97.0B",
+                "change": "-2.8%"
+            },
+            { "label": "EPS (TTM)", "value": "$6.13", "change": "-2.4%" },
+            { "label": "ROE", "value": "174.6%", "change": "+8.2%" }
+        ],
+        "documents": [
+            {
+                "id": 1,
+                "title": "Q4 2023 Earnings Report",
+                "type": "10-K",
+                "date": "2024-01-15",
+                "size": "2.4 MB",
+                "category": "Earnings"
+            },
+            {
+                "id": 2,
+                "title": "Annual Report 2023",
+                "type": "10-K",
+                "date": "2024-01-10",
+                "size": "8.7 MB",
+                "category": "Annual"
+            },
+            {
+                "id": 3,
+                "title": "Q3 2023 Financial Statements",
+                "type": "10-Q",
+                "date": "2023-10-30",
+                "size": "1.8 MB",
+                "category": "Quarterly"
+            },
+            {
+                "id": 4,
+                "title": "Proxy Statement 2023",
+                "type": "DEF 14A",
+                "date": "2023-04-15",
+                "size": "3.2 MB",
+                "category": "Proxy"
+            }
+        ]
+    }
+}
