@@ -39,4 +39,9 @@ coverage/
 # Zip
 *.zip
 
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+#Python Virtual Environment
 /DjangoApi/VirtualENV/

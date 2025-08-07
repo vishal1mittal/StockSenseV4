@@ -1,5 +1,6 @@
 {
     "symbol": "AAPL",
+    "currency": "USD",
     "companyName": "Apple Inc.",
     "overview": {
         "price": 175.43,
