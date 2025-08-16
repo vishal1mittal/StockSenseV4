@@ -3,6 +3,7 @@ import demoData from "../data/demoData.json";
 export interface StockData {
     symbol: string;
     companyName: string;
+    currency: string;
     overview?: {
         price: number;
         change: number;
@@ -128,7 +129,7 @@ export const fetchStockData = async (symbol: string): Promise<StockData> => {
         // Return demo data with the requested symbol
         return {
             ...demoData,
-            symbol: symbol.toUpperCase(),
+            symbol: `${symbol.toUpperCase()} (Demo)`,
             companyName: `${symbol.toUpperCase()} Inc.`,
         } as StockData;
     }

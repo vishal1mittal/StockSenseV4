@@ -24,6 +24,7 @@ interface HistoricalPerformanceProps {
             "1y": number;
         };
     };
+    currency: string;
 }
 
 const HistoricalPerformance: React.FC<HistoricalPerformanceProps> = ({

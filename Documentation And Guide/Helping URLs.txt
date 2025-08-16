@@ -1,0 +1,2 @@
+https://upstox.com/developer/api-documentation/example-code/historical-data/v3/historical-candle-data
+https://upstox.com/developer/api-documentation/v3/get-historical-candle-data
