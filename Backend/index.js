@@ -8,15 +8,17 @@ const { ConnectDB } = require("./Database/db");
 const { HistoricalData } = require("./Modules/HistoricalData");
 const { GetInstruments } = require("./Helper/GetInstruments");
 const { Recommendation } = require("./Recommendation/Recommendation");
+const authRoutes = require("./Routes/auth");
 
 const app = express();
 const port = process.env.PORT;
-app.use(cors());
-app.use(express.json());
-
 ConnectDB();
 
-app.get("/", async (req, res) => {
+app.use(cors());
+app.use(express.json());
+app.use("/auth", authRoutes);
+
+app.get("/refresh-instruments", async (req, res) => {
     const result = await GetInstruments();
     res.json(result);
     // try {
