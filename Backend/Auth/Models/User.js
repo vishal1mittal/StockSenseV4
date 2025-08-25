@@ -21,6 +21,8 @@ const UserSchema = new mongoose.Schema(
             trim: true,
         },
         emailVerified: { type: Boolean, default: false },
+        emailVerificationToken: { type: String },
+        emailVerificationExpires: { type: Date },
 
         // Local auth
         passwordHash: { type: String }, // null for OAuth-only users

@@ -22,6 +22,7 @@ passport.use(
                         email: profile.emails[0].value,
                         oauthProvider: "google",
                         oauthId: profile.id,
+                        emailVerified: true,
                     });
                 } else if (!user.oauthId) {
                     user.oauthProvider = "google";

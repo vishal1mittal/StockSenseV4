@@ -1,4 +1,6 @@
 const express = require("express");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const router = express.Router();
 
 const User = require("../Auth/Models/User");
@@ -6,7 +8,7 @@ const Auth = require("../Auth/Services");
 const authenticateToken = require("../Auth/Middleware/authenticate");
 const authorizeRoles = require("../Auth/Middleware/authorize");
 const passport = require("../Auth/Strategies/google");
-const { hash } = require("argon2");
+const { otpEmailTemplate } = require("../Helper/emailTemplate");
 
 const { generateAccessToken } = Auth.tokens;
 const { createSession, verifySession, revokeSession } = Auth.session;
@@ -28,15 +30,113 @@ router.post("/register", async (req, res) => {
 
         const passwordHash = await hashPassword(password);
 
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const otpHash = await hashPassword(otp);
+
         const user = await User.create({
             email,
             passwordHash,
+            emailVerified: false,
+            emailVerificationToken: otpHash,
+            emailVerificationExpires: Date.now() + 5 * 60 * 1000,
         });
 
-        res.status(201).json({ message: "User registered", uid: user._id });
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_ID,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        await transporter.sendMail({
+            from: `"StockSense" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Verify your email",
+            html: otpEmailTemplate({ name: email.split("@")[0], otp: otp }),
+        });
+
+        res.status(201).json({
+            message: "User registered, check your email for OTP",
+        });
     } catch (error) {
         console.error("Register error: ", error);
-        res.status(201).json({ error: "Server error" });
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.post("/verifyemail", async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        if (!user.emailVerificationToken) {
+            return res.status(400).json({ error: "Invalid or expired OTP" });
+        }
+
+        if (Date.now() > user.emailVerificationExpires) {
+            return res.status(400).json({ error: "OTP expired" });
+        }
+
+        const isValid = await verifyPassword(
+            user.emailVerificationToken,
+            otp.toString()
+        );
+        if (!isValid) return res.status(400).json({ error: "Invalid OTP" });
+
+        user.emailVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpires = undefined;
+
+        await user.save();
+
+        res.status(201).json({ message: "Email verified successfully" });
+    } catch (error) {
+        console.error("Verify email error: ", error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.post("/resendemailotp", async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(201).json({ error: "User not found" });
+
+        if (user.emailVerified) {
+            return res.status(400).json({ error: "Email already Verified" });
+        }
+
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const otpHash = await hashPassword(otp);
+
+        user.emailVerificationToken = otpHash;
+        user.emailVerificationExpires = Date.now() + 5 * 60 * 1000;
+
+        await user.save();
+
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.EMAIL_ID,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        await transporter.sendMail({
+            from: `"StockSense" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Verify your email",
+            html: otpEmailTemplate({ name: email.split("@")[0], otp: otp }),
+        });
+
+        res.status(201).json({ message: "New OTP sent" });
+    } catch (error) {
+        console.error("Resend verification error: ", error);
+        res.status(500).json({ error: "Server error" });
     }
 });
 
@@ -47,6 +147,10 @@ router.post("/login", async (req, res) => {
 
         if (!user)
             return res.status(401).json({ error: "Invalid credentials" });
+
+        if (!user.emailVerified) {
+            return res.status(403).json({ error: "Email not verified" });
+        }
 
         const ok = await verifyPassword(user.passwordHash, password);
 
