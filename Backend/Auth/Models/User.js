@@ -31,6 +31,8 @@ const UserSchema = new mongoose.Schema(
 
         // 2FA (optional, for later)
         twoFA: { type: TwoFASchema, default: () => ({}) },
+        oauthProvider: { type: String },
+        oauthId: { type: String },
     },
     { timestamps: true }
 );

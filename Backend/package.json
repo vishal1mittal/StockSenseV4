@@ -18,6 +18,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
     "nodemon": "^3.1.10",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
     "upstox-js-sdk": "^2.19.0",
     "uuid": "^11.1.0"
   }
