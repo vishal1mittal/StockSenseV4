@@ -1,58 +1,34 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const helmet = require("helmet");
+
 dotenv.config();
 
 const { ConnectDB } = require("./Database/db");
-const { HistoricalData } = require("./Modules/HistoricalData");
-const { GetInstruments } = require("./Helper/GetInstruments");
-const { Recommendation } = require("./Recommendation/Recommendation");
-const authRoutes = require("./Routes/auth");
+const { logger } = require("./Helper");
+const routes = require("./Routes");
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8031;
+
 ConnectDB();
 
-app.use(cors());
+app.use(helmet());
+app.use(
+    cors({ origin: process.env.FRONTEND_ORIGIN || "*", credentials: true })
+);
 app.use(express.json());
-app.use("/auth", authRoutes);
 
-app.get("/refresh-instruments", async (req, res) => {
-    const result = await GetInstruments();
-    res.json(result);
-    // try {
-    //     const historicalData = await HistoricalData(
-    //         "NSE_FO|106094",
-    //         "days",
-    //         "1",
-    //         "2023-08-16",
-    //         "2025-08-16",
-    //         "HistoricalData.json"
-    //     );
-    //     res.json(historicalData);
-    // } catch (error) {
-    //     console.log(error);
-    //     res.status(500).json({ error: "Failed to fetch historical data" });
-    // }
+app.use("/api", routes);
 
-    // res.send(
-    //     await HistoricalData(
-    //         "NSE_FO|106094",
-    //         "days",
-    //         "1",
-    //         "2023-08-16",
-    //         "2025-08-16",
-    //         "HistoricalData.json"
-    //     )
-    // );
-});
+app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
-app.post("/recommend", async (req, res) => {
-    const partialName = req.body.partialName;
-
-    const result = await Recommendation(partialName);
-    res.json(result);
+app.use((err, req, res, next) => {
+    logger.error({ err: err.message, path: req.path });
+    res.status(err.statusCode || 500).json({
+        error: err.message || "Server error",
+    });
 });
 
 app.listen(port, () => {
