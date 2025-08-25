@@ -49,7 +49,6 @@ app.get("/refresh-instruments", async (req, res) => {
 });
 
 app.post("/recommend", async (req, res) => {
-    console.log(req.body);
     const partialName = req.body.partialName;
 
     const result = await Recommendation(partialName);
