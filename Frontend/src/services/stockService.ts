@@ -1,4 +1,6 @@
+// 📂 src/services/stockService.ts
 import demoData from "../data/demoData.json";
+import { fetchWrapper } from "./fetchWrapper"; // ⬅️ import wrapper
 
 export interface StockData {
     symbol: string;
@@ -95,28 +97,18 @@ export interface StockData {
     };
 }
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+// Use env variable instead of hardcoding
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const fetchStockData = async (symbol: string): Promise<StockData> => {
     try {
         console.log(`Fetching data for ${symbol} from API...`);
 
-        const response = await fetch(`${API_BASE_URL}/${symbol}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            // Add timeout to prevent hanging
-            signal: AbortSignal.timeout(10000), // 10 second timeout
-        });
+        // relative path since fetchWrapper already adds base URL
+        const data = await fetchWrapper.get<StockData>(
+            `/api/stocks/${symbol}/summary`
+        );
 
-        if (!response.ok) {
-            throw new Error(
-                `API request failed with status: ${response.status}`
-            );
-        }
-
-        const data = await response.json();
         console.log("API response received:", data);
 
         return {
@@ -126,20 +118,10 @@ export const fetchStockData = async (symbol: string): Promise<StockData> => {
     } catch (error) {
         console.warn("API request failed, falling back to demo data:", error);
 
-        // Return demo data with the requested symbol
         return {
             ...demoData,
             symbol: `${symbol.toUpperCase()} (Demo)`,
             companyName: `${symbol.toUpperCase()} Inc.`,
         } as StockData;
     }
-};
-
-// Helper function to check if a section has data
-export const hasData = (data: any): boolean => {
-    return (
-        data !== undefined &&
-        data !== null &&
-        (typeof data !== "object" || Object.keys(data).length > 0)
-    );
 };
