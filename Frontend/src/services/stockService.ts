@@ -1,4 +1,6 @@
 import demoData from "../data/demoData.json";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const ACCESS_TOKEN = import.meta.env.VITE_ACCESS_TOKEN;
 
 export interface StockData {
     symbol: string;
@@ -95,16 +97,15 @@ export interface StockData {
     };
 }
 
-const API_BASE_URL = "http://127.0.0.1:8000";
-
 export const fetchStockData = async (symbol: string): Promise<StockData> => {
     try {
         console.log(`Fetching data for ${symbol} from API...`);
 
-        const response = await fetch(`${API_BASE_URL}/${symbol}`, {
+        const response = await fetch(`${API_BASE_URL}/${symbol}/summary`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${ACCESS_TOKEN}`,
             },
             // Add timeout to prevent hanging
             signal: AbortSignal.timeout(10000), // 10 second timeout
