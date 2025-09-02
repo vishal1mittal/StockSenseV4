@@ -8,7 +8,7 @@ function generateAccessToken(user) {
             auth_ver: user.auth_ver,
         },
         process.env.JWT_ACCESS_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "5m" } //to change to 5m after testing
     );
 }
 

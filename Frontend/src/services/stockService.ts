@@ -1,6 +1,5 @@
 import demoData from "../data/demoData.json";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const ACCESS_TOKEN = import.meta.env.VITE_ACCESS_TOKEN;
+import { fetchStockSummary, callAndUnwrap } from "./apiClient";
 
 export interface StockData {
     symbol: string;
@@ -97,44 +96,22 @@ export interface StockData {
     };
 }
 
-export const fetchStockData = async (symbol: string): Promise<StockData> => {
+export async function fetchStockData(symbol: string): Promise<StockData> {
     try {
-        console.log(`Fetching data for ${symbol} from API...`);
-
-        const response = await fetch(`${API_BASE_URL}/${symbol}/summary`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${ACCESS_TOKEN}`,
-            },
-            // Add timeout to prevent hanging
-            signal: AbortSignal.timeout(10000), // 10 second timeout
-        });
-
-        if (!response.ok) {
-            throw new Error(
-                `API request failed with status: ${response.status}`
-            );
-        }
-
-        const data = await response.json();
-        console.log("API response received:", data);
-
+        const stock = await callAndUnwrap(fetchStockSummary(symbol));
         return {
-            ...data,
-            symbol: data.symbol.toUpperCase(),
+            ...stock,
+            symbol: stock.symbol.toUpperCase(),
         };
     } catch (error) {
         console.warn("API request failed, falling back to demo data:", error);
-
-        // Return demo data with the requested symbol
         return {
             ...demoData,
             symbol: `${symbol.toUpperCase()} (Demo)`,
             companyName: `${symbol.toUpperCase()} Inc.`,
         } as StockData;
     }
-};
+}
 
 // Helper function to check if a section has data
 export const hasData = (data: any): boolean => {

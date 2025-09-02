@@ -21,8 +21,7 @@ const twoFactorSetupSchema = z.object({
 type TwoFactorSetupData = z.infer<typeof twoFactorSetupSchema>;
 
 interface TwoFactorSetupProps {
-    secret?: string;
-    qrCodeData?: string;
+    otpAuthUrl?: string;
     backupCodes?: string[];
     onVerifyAndEnable?: (code: string) => Promise<void>;
     onSkip?: () => void;
@@ -30,14 +29,14 @@ interface TwoFactorSetupProps {
 }
 
 const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
-    secret,
-    qrCodeData,
+    otpAuthUrl,
     backupCodes,
     onVerifyAndEnable,
     onSkip,
     onBack,
 }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
+    const [secret, setSecret] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [secretCopied, setSecretCopied] = useState(false);
     const [step, setStep] = useState<"setup" | "verify" | "backup-codes">(
@@ -57,12 +56,23 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
     const code = watch("code");
 
     useEffect(() => {
-        if (qrCodeData) {
-            QRCode.toDataURL(qrCodeData)
-                .then(setQrCodeUrl)
-                .catch(console.error);
+        if (otpAuthUrl) {
+            try {
+                // The URLSearchParams API can parse the secret from the otpAuthUrl
+                const url = new URL(otpAuthUrl);
+                const extractedSecret = url.searchParams.get("secret");
+                if (extractedSecret) {
+                    setSecret(extractedSecret);
+                }
+
+                QRCode.toDataURL(otpAuthUrl)
+                    .then(setQrCodeUrl)
+                    .catch(console.error);
+            } catch (error) {
+                console.error("Failed to process otpAuthUrl:", error);
+            }
         }
-    }, [qrCodeData]);
+    }, [otpAuthUrl]);
 
     const handleCopySecret = async () => {
         if (!secret) return;

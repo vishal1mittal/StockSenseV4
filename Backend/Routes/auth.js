@@ -254,27 +254,20 @@ router.post("/logout", async (req, res) => {
 router.post("/enable2fa", authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
-
         if (!user) return res.status(404).json({ error: "User not found" });
-
-        const { base32, qrCodeDataURL } = await Auth.twofa.generate2FASecret(
-            user.email
-        );
-
+        const { base32, otpauthUrl } = Auth.twofa.generate2FASecret(user.email);
         user.twoFA.secretEnc = base32;
         await user.save();
-
         res.json({
             message:
                 "2FA secret generated. Scan QR code in your authenticator app.",
-            qrCodeDataURL,
+            otpauthUrl, // Send the smaller URI string instead of the large QR image
         });
     } catch (error) {
         console.error("Enable 2FA error: ", error);
         res.status(500).json({ error: "Server error" });
     }
 });
-
 router.post("/confirm2fa", authenticateToken, async (req, res) => {
     try {
         const { token } = req.body;
@@ -410,12 +403,11 @@ router.get(
                 req.headers["user-agent"] || "unknown"
             );
 
-        res.json({
-            accessToken,
-            refreshToken,
-            opaqueToken,
-            sessionId: session.sessionId,
-        });
+        // Construct the URL to redirect back to the frontend
+        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:8080";
+        const redirectUrl = `${frontendUrl}/auth?accessToken=${accessToken}&refreshToken=${refreshToken}&sessionId=${session.sessionId}`;
+
+        res.redirect(redirectUrl);
     }
 );
 

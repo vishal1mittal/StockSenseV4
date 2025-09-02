@@ -13,7 +13,7 @@ const AuthDemo = () => {
         <AuthManager
             initialStep="login" // Can be 'login', 'register', 'otp-verification', '2fa-setup', '2fa-verification'
             onAuthSuccess={handleAuthSuccess}
-            apiBaseUrl="https://api.stocksense.com" // Your API base URL
+            apiBaseUrl={import.meta.env.VITE_API_BASE_URL} // Your API base URL
         />
     );
 };

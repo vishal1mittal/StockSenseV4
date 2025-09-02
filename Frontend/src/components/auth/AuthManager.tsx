@@ -1,9 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import OTPVerification from "./OTPVerification";
 import TwoFactorSetup from "./TwoFactorSetup";
 import TwoFactorVerification from "./TwoFactorVerification";
+import {
+    setTokens,
+    login,
+    register,
+    verifyEmail,
+    resendEmailOTP,
+    enable2fa,
+    confirm2fa,
+    disable2fa,
+    isNormalizedError,
+} from "../../services/apiClient";
 
 type AuthStep =
     | "login"
@@ -14,9 +26,9 @@ type AuthStep =
 
 interface AuthData {
     email?: string;
+    password?: string;
     fullName?: string;
-    twoFactorSecret?: string;
-    qrCodeData?: string;
+    otpAuthUrl?: string; // Updated to store the URI string
     backupCodes?: string[];
 }
 
@@ -29,31 +41,49 @@ interface AuthManagerProps {
 const AuthManager: React.FC<AuthManagerProps> = ({
     initialStep = "login",
     onAuthSuccess,
-    apiBaseUrl = "https://api.stocksense.com",
+    apiBaseUrl = import.meta.env.VITE_API_BASE_URL,
 }) => {
     const [currentStep, setCurrentStep] = useState<AuthStep>(initialStep);
     const [authData, setAuthData] = useState<AuthData>({});
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    // API call functions - replace these with your actual API endpoints
-    const handleLogin = async (data: { email: string; password: string }) => {
-        const response = await fetch(`${apiBaseUrl}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
+    useEffect(() => {
+        const accessToken = searchParams.get("accessToken");
+        const refreshToken = searchParams.get("refreshToken");
+        const sessionId = searchParams.get("sessionId");
 
-        if (!response.ok) {
-            const error = await response.json();
-            if (error.code === "2FA_REQUIRED") {
-                setAuthData({ email: data.email });
+        if (accessToken && refreshToken && sessionId) {
+            setTokens({ accessToken, refreshToken, sessionId });
+            onAuthSuccess?.({ sessionId });
+
+            searchParams.delete("accessToken");
+            searchParams.delete("refreshToken");
+            searchParams.delete("sessionId");
+            setSearchParams(searchParams, { replace: true });
+        }
+    }, [searchParams, setSearchParams, onAuthSuccess]);
+
+    const handleLogin = async (data: {
+        email: string;
+        password: string;
+        token?: string;
+        backupCode?: string;
+    }) => {
+        const result = await login(data);
+
+        if (isNormalizedError(result)) {
+            if (
+                result.status === 401 &&
+                result.error === "2FA required or invalid"
+            ) {
+                setAuthData({ email: data.email, password: data.password });
                 setCurrentStep("2fa-verification");
-                throw new Error("2FA_REQUIRED");
+                throw new Error(result.error);
             }
-            throw new Error(error.message || "Login failed");
+            throw new Error(result.error || "Login failed");
         }
 
-        const result = await response.json();
-        onAuthSuccess?.(result.user);
+        onAuthSuccess?.({ sessionId: result.data.sessionId });
     };
 
     const handleRegister = async (data: {
@@ -61,15 +91,10 @@ const AuthManager: React.FC<AuthManagerProps> = ({
         email: string;
         password: string;
     }) => {
-        const response = await fetch(`${apiBaseUrl}/auth/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
+        const result = await register(data.email, data.password);
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Registration failed");
+        if (isNormalizedError(result)) {
+            throw new Error(result.error || "Registration failed");
         }
 
         setAuthData({ email: data.email, fullName: data.fullName });
@@ -77,97 +102,78 @@ const AuthManager: React.FC<AuthManagerProps> = ({
     };
 
     const handleGoogleAuth = async () => {
-        // Redirect to Google OAuth endpoint
         window.location.href = `${apiBaseUrl}/auth/google`;
     };
 
-    const handleOTPVerification = async (code: string) => {
-        const response = await fetch(`${apiBaseUrl}/auth/verify-email`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: authData.email, code }),
-        });
+    const handleOTPVerification = async (otp: string) => {
+        const result = await verifyEmail(authData.email as string, otp);
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Verification failed");
+        if (isNormalizedError(result)) {
+            throw new Error(result.error || "Verification failed");
         }
-
-        const result = await response.json();
-
-        // Check if 2FA setup is required
-        if (result.setup2FA) {
-            setAuthData({
-                ...authData,
-                twoFactorSecret: result.secret,
-                qrCodeData: result.qrCodeData,
-                backupCodes: result.backupCodes,
-            });
-            setCurrentStep("2fa-setup");
-        } else {
-            onAuthSuccess?.(result.user);
-        }
+        onAuthSuccess?.({ email: authData.email });
     };
 
     const handleResendOTP = async () => {
-        const response = await fetch(`${apiBaseUrl}/auth/resend-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: authData.email }),
-        });
+        const result = await resendEmailOTP(authData.email as string);
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "Failed to resend OTP");
+        if (isNormalizedError(result)) {
+            throw new Error(result.error || "Failed to resend OTP");
         }
     };
 
-    const handle2FASetup = async (code: string) => {
-        const response = await fetch(`${apiBaseUrl}/auth/setup-2fa`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                email: authData.email,
-                secret: authData.twoFactorSecret,
-                code,
-            }),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "2FA setup failed");
+    const start2FASetup = async () => {
+        const result = await enable2fa();
+        if (isNormalizedError(result)) {
+            throw new Error(result.error);
         }
-
-        const result = await response.json();
-        onAuthSuccess?.(result.user);
+        setAuthData({ ...authData, otpAuthUrl: result.data.otpauthUrl });
+        setCurrentStep("2fa-setup");
     };
 
     const handle2FAVerification = async (
         code: string,
         isBackupCode = false
     ) => {
-        const response = await fetch(`${apiBaseUrl}/auth/verify-2fa`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                email: authData.email,
-                code,
-                isBackupCode,
-            }),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || "2FA verification failed");
+        const { email, password } = authData;
+        if (!email || !password) {
+            throw new Error("Email and password missing for 2FA verification.");
         }
+        const loginPayload: any = { email, password };
+        if (isBackupCode) {
+            loginPayload.backupCode = code;
+        } else {
+            loginPayload.token = code;
+        }
+        try {
+            await handleLogin(loginPayload);
+        } catch (error) {
+            throw error;
+        }
+    };
 
-        const result = await response.json();
-        onAuthSuccess?.(result.user);
+    const handle2FAConfirm = async (code: string) => {
+        const result = await confirm2fa(code);
+        if (isNormalizedError(result)) {
+            throw new Error(result.error);
+        }
+        setAuthData({ ...authData, backupCodes: result.data.backupCodes });
+        onAuthSuccess?.({});
+    };
+
+    const handle2FADisable = async (
+        password: string,
+        token?: string,
+        backupCode?: string
+    ) => {
+        const result = await disable2fa({ password, token, backupCode });
+        if (isNormalizedError(result)) {
+            throw new Error(result.error);
+        }
+        onAuthSuccess?.({});
     };
 
     const handle2FASkip = () => {
-        // For now, just redirect to success - in production, you might want to
-        // mark the user as having skipped 2FA setup
         onAuthSuccess?.({ email: authData.email });
     };
 
@@ -194,10 +200,9 @@ const AuthManager: React.FC<AuthManagerProps> = ({
         case "2fa-setup":
             return (
                 <TwoFactorSetup
-                    secret={authData.twoFactorSecret}
-                    qrCodeData={authData.qrCodeData}
+                    otpAuthUrl={authData.otpAuthUrl}
                     backupCodes={authData.backupCodes}
-                    onVerifyAndEnable={handle2FASetup}
+                    onVerifyAndEnable={handle2FAConfirm}
                     onSkip={handle2FASkip}
                     onBack={() => setCurrentStep("otp-verification")}
                 />
@@ -218,7 +223,6 @@ const AuthManager: React.FC<AuthManagerProps> = ({
                     onGoogleLogin={handleGoogleAuth}
                     onSwitchToRegister={() => setCurrentStep("register")}
                     onForgotPassword={() => {
-                        // Handle forgot password - could be another step
                         console.log("Forgot password clicked");
                     }}
                     onTwoFactorRequired={() =>
