@@ -1,22 +1,22 @@
 /*
-  frontend-apiClient.ts
-  Single-file API client for the frontend that encapsulates:
-    - auth flows (register, login, verify email, resend otp)
-    - token storage (access, refresh, opaque token, sessionId)
-    - token refresh flow with request queuing and a refresh mutex
-    - 2FA flows (enable, confirm, disable, refresh backup codes)
-    - profile and logout
-    - stock endpoints (summary, overview, historical, risk, technical, predictions, news, financedocs)
-    - helpers: request timeout, error normalization, subscription to auth state changes
+  frontend-apiClient.ts
+  Single-file API client for the frontend that encapsulates:
+    - auth flows (register, login, verify email, resend otp)
+    - token storage (access, refresh, opaque token, sessionId)
+    - token refresh flow with request queuing and a refresh mutex
+    - 2FA flows (enable, confirm, disable, refresh backup codes)
+    - profile and logout
+    - stock endpoints (summary, overview, historical, risk, technical, predictions, news, financedocs)
+    - helpers: request timeout, error normalization, subscription to auth state changes
 
-  Usage (high level): import functions from this module and call them from components or services.
+  Usage (high level): import functions from this module and call them from components or services.
 
-  Implementation notes:
-    - Tokens stored in localStorage under a single key; you can swap to cookies or other secure storage.
-    - Automatic token refresh: when a 401 is encountered, the client will attempt a refresh using the stored refreshToken + opaqueToken.
-      Requests launched while a refresh is in progress are queued and resumed after refresh success. If refresh fails, queued requests are rejected.
-    - 2FA endpoints follow your backend routes (enable2fa, confirm2fa, refresh2fabackup, disable2fa).
-    - All functions return a normalized result: either { ok: true, data } or { ok: false, error }
+  Implementation notes:
+    - Tokens stored in localStorage under a single key; you can swap to cookies or other secure storage.
+    - Automatic token refresh: when a 401 is encountered, the client will attempt a refresh using the stored refreshToken + opaqueToken.
+      Requests launched while a refresh is in progress are queued and resumed after refresh success. If refresh fails, queued requests are rejected.
+    - 2FA endpoints follow your backend routes (enable2fa, confirm2fa, refresh2fabackup, disable2fa).
+    - All functions return a normalized result: either { ok: true, data } or { ok: false, error }
 */
 
 // --------- Configuration & Types ---------
@@ -26,7 +26,8 @@ const API_BASE_URL =
     "/api";
 
 // storage key for tokens
-const STORAGE_KEY = "stocksense_auth";
+const STORAGE_KEY = import.meta.env.VITE_STORAGE_KEY as string;
+const RETURN_URL_KEY = "stocksense_return_url";
 
 type Nullable<T> = T | null;
 
@@ -59,8 +60,7 @@ export function isNormalizedError(result: any): result is NormalizedError {
 export interface UserProfile {
     id: string;
     email: string;
-    roles?: string[];
-    // Adding the twoFA property to resolve the TypeScript error
+    roles?: string[]; // Adding the twoFA property to resolve the TypeScript error
     twoFA?: {
         enabled: boolean;
         secretEnc?: string | null;
@@ -74,8 +74,7 @@ let tokenStore: TokenStore = loadTokenStore();
 // A simple subscriber pattern so the app can react to sign-in/sign-out
 const authSubscribers: Array<(store: TokenStore) => void> = [];
 export const subscribeAuth = (fn: (store: TokenStore) => void) => {
-    authSubscribers.push(fn);
-    // return unsubscribe
+    authSubscribers.push(fn); // return unsubscribe
     return () => {
         const idx = authSubscribers.indexOf(fn);
         if (idx >= 0) authSubscribers.splice(idx, 1);
@@ -126,6 +125,7 @@ export function clearAuth() {
         opaqueToken: null,
         sessionId: null,
     };
+    localStorage.removeItem(RETURN_URL_KEY);
     persistTokenStore();
 }
 
@@ -136,6 +136,23 @@ export function setTokens(tokens: Partial<TokenStore>) {
 
 export function getTokens(): TokenStore {
     return { ...tokenStore };
+}
+
+export function handleLoginRedirect() {
+    const returnUrl = localStorage.getItem(RETURN_URL_KEY) || "/";
+    localStorage.removeItem(RETURN_URL_KEY);
+    window.location.href = returnUrl;
+}
+
+export function loginAsDemo(returnUrl: string = "/") {
+    const demoTokens = {
+        accessToken: import.meta.env.VITE_ACCESS_TOKEN as string,
+        refreshToken: import.meta.env.VITE_REFRESH_TOKEN as string,
+        opaqueToken: import.meta.env.VITE_OPAQUE_TOKEN as string,
+        sessionId: import.meta.env.VITE_SESSION_ID as string,
+    };
+    setTokens(demoTokens);
+    handleLoginRedirect();
 }
 
 // ------------- Request helpers ---------------
@@ -169,8 +186,7 @@ async function rawRequest(
 ) {
     const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
     const init = { ...opts };
-    if (!init.headers) init.headers = {};
-    // ensure JSON content type for bodies
+    if (!init.headers) init.headers = {}; // ensure JSON content type for bodies
     if (init.body && !(init.headers as any)["Content-Type"]) {
         (init.headers as any)["Content-Type"] = "application/json";
     }
@@ -250,23 +266,25 @@ async function authRequest<T>(
     opts: RequestInit = {},
     timeoutMs = 10000
 ): ApiResult<T> {
-    // attach Authorization if we have an accessToken
+    // If the user is a demo user, do not make an API call.
+    if (isDemoUser()) {
+        return { ok: false, error: "Demo mode, skipping API call" };
+    } // attach Authorization if we have an accessToken
+
     const headers: HeadersInit = { ...(opts.headers || {}) };
     if (tokenStore.accessToken)
         headers["Authorization"] = `Bearer ${tokenStore.accessToken}`;
 
     const res = await rawRequest(path, { ...opts, headers }, timeoutMs);
-    if (res.ok) return { ok: true, data: res.data as T };
+    if (res.ok) return { ok: true, data: res.data as T }; // if 401 -> try refresh once
 
-    // if 401 -> try refresh once
     if (res.status === 401) {
         const refreshed = await refreshAccessToken();
         if (!refreshed)
             return normalizeErrorResponse(
                 { error: "Unauthorized - refresh failed" },
                 401
-            );
-        // retry the request with new token
+            ); // retry the request with new token
         const headers2: HeadersInit = { ...(opts.headers || {}) };
         if (tokenStore.accessToken)
             headers2["Authorization"] = `Bearer ${tokenStore.accessToken}`;
@@ -374,8 +392,7 @@ export async function refresh2faBackup(
 }
 
 export async function enable2fa(): ApiResult<{
-    message: string;
-    // Updated type to reflect the backend change
+    message: string; // Updated type to reflect the backend change
     otpauthUrl?: string;
 }> {
     const r = await authRequest<{ message: string; otpauthUrl?: string }>(
@@ -444,7 +461,7 @@ export interface StockData {
         beta: number;
         sharpeRatio: number;
         maxDrawdown: number;
-        var95: number;
+        var95?: number;
     };
     technicalLevels?: {
         currentPrice: number;
@@ -467,7 +484,7 @@ export interface StockData {
             date: string;
             predictedPrice: number;
             confidence: number;
-            direction: string;
+            direction?: string;
         }>;
         summary: {
             nextDayPrediction: {
@@ -561,7 +578,12 @@ export async function fetchStockFinanceDocs(symbol: string) {
 
 // --------------- Utilities / Validators ----------------
 export function isAuthenticated() {
-    return Boolean(tokenStore.accessToken);
+    const currentToken = getTokens().accessToken;
+    return Boolean(currentToken);
+}
+
+export function isDemoUser() {
+    return getTokens().accessToken === "demo-access-token";
 }
 
 // Optional: programmatic way to set base url (useful in tests)

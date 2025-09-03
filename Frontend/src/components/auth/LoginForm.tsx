@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import AuthLayout from "./AuthLayout";
+import { Link } from "react-router-dom";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -199,6 +200,11 @@ const LoginForm: React.FC<LoginFormProps> = ({
                     >
                         Sign up
                     </button>
+                </div>
+                <div className="mt-4 text-center">
+                    <Link to="/">
+                        <Button variant="ghost">Back to Home</Button>
+                    </Link>
                 </div>
             </form>
         </AuthLayout>

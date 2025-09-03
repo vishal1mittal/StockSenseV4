@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { fetchStockData, StockData } from "../services/stockService";
+import { isAuthenticated } from "../services/apiClient";
 
 export const useStockData = (symbol: string | null) => {
     const [data, setData] = useState<StockData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Get the latest auth status
+    const isAuth = isAuthenticated();
 
     useEffect(() => {
         if (!symbol) {
@@ -33,7 +37,7 @@ export const useStockData = (symbol: string | null) => {
         };
 
         loadStockData();
-    }, [symbol]);
+    }, [symbol, isAuth]);
 
     return { data, loading, error };
 };

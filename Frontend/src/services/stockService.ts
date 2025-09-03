@@ -1,5 +1,10 @@
 import demoData from "../data/demoData.json";
-import { fetchStockSummary, callAndUnwrap } from "./apiClient";
+import {
+    fetchStockSummary,
+    callAndUnwrap,
+    isAuthenticated,
+    isDemoUser,
+} from "./apiClient";
 
 export interface StockData {
     symbol: string;
@@ -30,7 +35,7 @@ export interface StockData {
         beta: number;
         sharpeRatio: number;
         maxDrawdown: number;
-        var95: number;
+        var95?: number;
     };
     technicalLevels?: {
         currentPrice: number;
@@ -53,7 +58,7 @@ export interface StockData {
             date: string;
             predictedPrice: number;
             confidence: number;
-            direction: string;
+            direction?: string;
         }>;
         summary: {
             nextDayPrediction: {
@@ -98,6 +103,13 @@ export interface StockData {
 
 export async function fetchStockData(symbol: string): Promise<StockData> {
     try {
+        const isAuth = isAuthenticated();
+        const isDemo = isDemoUser();
+
+        if (!isAuth) {
+            throw new Error("Showing demo data");
+        }
+
         const stock = await callAndUnwrap(fetchStockSummary(symbol));
         return {
             ...stock,
@@ -113,7 +125,6 @@ export async function fetchStockData(symbol: string): Promise<StockData> {
     }
 }
 
-// Helper function to check if a section has data
 export const hasData = (data: any): boolean => {
     return (
         data !== undefined &&

@@ -64,7 +64,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                 if (extractedSecret) {
                     setSecret(extractedSecret);
                 }
-
                 QRCode.toDataURL(otpAuthUrl)
                     .then(setQrCodeUrl)
                     .catch(console.error);
@@ -74,9 +73,14 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
         }
     }, [otpAuthUrl]);
 
+    useEffect(() => {
+        if (backupCodes && backupCodes.length > 0) {
+            setStep("backup-codes");
+        }
+    }, [backupCodes]);
+
     const handleCopySecret = async () => {
         if (!secret) return;
-
         try {
             await navigator.clipboard.writeText(secret);
             setSecretCopied(true);
@@ -96,13 +100,12 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
 
     const onSubmit = async (data: TwoFactorSetupData) => {
         if (!onVerifyAndEnable) return;
-
         setIsLoading(true);
         try {
             await onVerifyAndEnable(data.code);
-            if (backupCodes && backupCodes.length > 0) {
-                setStep("backup-codes");
-            }
+            // The onVerifyAndEnable prop handles the backup code logic externally
+            // so we don't need to check backupCodes here. The caller (UserProfile)
+            // will update the state, which triggers the useEffect above.
         } catch (error: any) {
             toast({
                 title: "Verification Failed",
@@ -116,7 +119,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
 
     const handleCopyBackupCodes = async () => {
         if (!backupCodes) return;
-
         const codesText = backupCodes.join("\n");
         try {
             await navigator.clipboard.writeText(codesText);
@@ -145,7 +147,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                         </div>
                     </div>
-
                     <Alert>
                         <Shield className="h-4 w-4" />
                         <AlertDescription>
@@ -154,7 +155,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             location.
                         </AlertDescription>
                     </Alert>
-
                     <div className="bg-muted p-4 rounded-lg">
                         <div className="grid grid-cols-2 gap-2 text-sm font-mono">
                             {backupCodes?.map((code, index) => (
@@ -167,7 +167,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             ))}
                         </div>
                     </div>
-
                     <div className="space-y-3">
                         <Button
                             type="button"
@@ -178,13 +177,17 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             <Copy className="mr-2 h-4 w-4" />
                             Copy Backup Codes
                         </Button>
-
                         <Button
                             type="button"
                             className="w-full"
                             onClick={() => {
-                                // This should redirect to the main app
-                                window.location.href = "/";
+                                // If the skip prop exists, call it (e.g., in the AuthManager flow)
+                                // Otherwise, call the onBack prop (e.g., in the UserProfile flow)
+                                if (onSkip) {
+                                    onSkip();
+                                } else if (onBack) {
+                                    onBack();
+                                }
                             }}
                         >
                             Continue to StockSense
@@ -207,7 +210,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             <Smartphone className="h-8 w-8 text-primary" />
                         </div>
                     </div>
-
                     <div className="space-y-4">
                         <div className="flex justify-center">
                             <InputOTP
@@ -231,7 +233,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             </p>
                         )}
                     </div>
-
                     <div className="space-y-3">
                         <Button
                             type="submit"
@@ -242,7 +243,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                                 ? "Verifying..."
                                 : "Enable Two-Factor Authentication"}
                         </Button>
-
                         <Button
                             type="button"
                             variant="ghost"
@@ -256,7 +256,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
             </AuthLayout>
         );
     }
-
     return (
         <AuthLayout
             title="Set up two-factor authentication"
@@ -268,14 +267,12 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                         <Shield className="h-8 w-8 text-primary" />
                     </div>
                 </div>
-
                 <div className="text-center space-y-2">
                     <h3 className="text-lg font-semibold">Scan QR Code</h3>
                     <p className="text-sm text-muted-foreground">
                         Use your authenticator app to scan this QR code
                     </p>
                 </div>
-
                 {qrCodeUrl && (
                     <div className="flex justify-center">
                         <div className="p-4 bg-white rounded-lg">
@@ -287,7 +284,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                         </div>
                     </div>
                 )}
-
                 <div className="space-y-3">
                     <p className="text-sm text-muted-foreground text-center">
                         Can't scan? Enter this secret key manually:
@@ -310,7 +306,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                         </Button>
                     </div>
                 </div>
-
                 <Alert>
                     <Smartphone className="h-4 w-4" />
                     <AlertDescription>
@@ -318,7 +313,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                         Authy, or Microsoft Authenticator to get started.
                     </AlertDescription>
                 </Alert>
-
                 <div className="space-y-3">
                     <Button
                         type="button"
@@ -327,7 +321,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                     >
                         I've Added the Account
                     </Button>
-
                     {onSkip && (
                         <Button
                             type="button"
@@ -338,7 +331,6 @@ const TwoFactorSetup: React.FC<TwoFactorSetupProps> = ({
                             Skip for Now
                         </Button>
                     )}
-
                     {onBack && (
                         <Button
                             type="button"

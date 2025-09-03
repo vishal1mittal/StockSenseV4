@@ -12,7 +12,7 @@ async function generate2FASecret(email) {
 
     return {
         base32: secret.base32,
-        otpauth_url: secret.otpauth_url,
+        otpauthUrl: secret.otpauth_url,
         qrCodeDataURL,
     };
 }

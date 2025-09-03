@@ -20,6 +20,8 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<AuthDemo />} />
                     <Route path="/profile" element={<UserProfile />} />
+                    {/* New magic route for direct stock links */}
+                    <Route path="/stock/:symbol" element={<Index />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                 </Routes>

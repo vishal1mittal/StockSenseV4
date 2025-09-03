@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import AuthLayout from "./AuthLayout";
+import { Link } from "react-router-dom";
 
 const registerSchema = z
     .object({
@@ -285,6 +286,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                     >
                         Sign in
                     </button>
+                </div>
+                <div className="mt-4 text-center">
+                    <Link to="/">
+                        <Button variant="ghost">Back to Home</Button>
+                    </Link>
                 </div>
             </form>
         </AuthLayout>

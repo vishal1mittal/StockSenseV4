@@ -20,7 +20,10 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, CheckCircle, Smartphone, ShieldOff } from "lucide-react";
+import { CheckCircle, ShieldOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 
 type ProfileStep = "profile" | "2fa-setup" | "2fa-disable" | "2fa-refresh";
 
@@ -64,6 +67,10 @@ const UserProfile = () => {
                 description: result.error,
                 variant: "destructive",
             });
+            if (result.status === 401) {
+                // Redirect on 401 Unauthorized, forcing a new login session
+                window.location.href = "/auth";
+            }
         } else if (result.data.otpauthUrl) {
             setOtpAuthUrl(result.data.otpauthUrl);
             setCurrentStep("2fa-setup");
@@ -85,10 +92,13 @@ const UserProfile = () => {
             setProfile((prev) =>
                 prev ? { ...prev, twoFA: { enabled: true } } : null
             );
-            setCurrentStep("profile"); // Or a confirmation screen
+            // After enabling, we want to show the backup codes. We can pass them
+            // directly to the TwoFactorSetup component which will handle the step change.
+            setCurrentStep("2fa-setup");
             toast({
                 title: "Success",
-                description: "Two-Factor Authentication is now enabled.",
+                description:
+                    "Two-Factor Authentication is now enabled. Please save your backup codes.",
             });
         }
         setIsLoading(false);
@@ -185,16 +195,19 @@ const UserProfile = () => {
                         Enter your password and a valid code to disable 2FA.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        required
+                    />
                     <TwoFactorVerification
-                        // The onVerify prop is now correctly handled by our wrapper function
                         onVerify={handleDisable2FA}
                         onBack={() => setCurrentStep("profile")}
-                        // We need a way to get the user's password for this flow.
-                        // Since this component doesn't have a password input, we'll assume a modal or
-                        // another form has captured it and set it in state.
-                        // For this code, a `disablePassword` state has been added and should be set
-                        // before navigating to this step.
                     />
                 </CardContent>
             </Card>
@@ -223,7 +236,6 @@ const UserProfile = () => {
                             {profile.roles?.join(", ") || "user"}
                         </p>
                     </div>
-
                     <div>
                         <h4 className="font-semibold text-lg">
                             Two-Factor Authentication (2FA)
@@ -266,8 +278,10 @@ const UserProfile = () => {
                             )}
                         </div>
                     </div>
-
-                    <div className="flex justify-end pt-4 border-t">
+                    <div className="flex justify-end pt-4 border-t space-x-2">
+                        <Link to="/">
+                            <Button variant="ghost">Home</Button>
+                        </Link>
                         <Button onClick={handleLogout} variant="destructive">
                             Logout
                         </Button>

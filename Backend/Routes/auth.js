@@ -255,7 +255,10 @@ router.post("/enable2fa", authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ error: "User not found" });
-        const { base32, otpauthUrl } = Auth.twofa.generate2FASecret(user.email);
+        const { base32, otpauthUrl } = await Auth.twofa.generate2FASecret(
+            user.email
+        );
+
         user.twoFA.secretEnc = base32;
         await user.save();
         res.json({
@@ -411,8 +414,17 @@ router.get(
     }
 );
 
-router.post("/profile", authenticateToken, (req, res) => {
-    res.json({ user: req.user });
+router.post("/profile", authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select("-passwordHash");
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        res.json({ user });
+    } catch (error) {
+        console.error("Profile error: ", error);
+        res.status(500).json({ error: "Server error" });
+    }
 });
 
 router.post(

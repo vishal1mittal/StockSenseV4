@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useStockData } from "../hooks/useStockData";
 import { hasData } from "../services/stockService";
+import { isAuthenticated, subscribeAuth } from "../services/apiClient";
 import StockOverview from "./dashboard/StockOverview";
 import HistoricalPerformance from "./dashboard/HistoricalPerformance";
 import RiskAnalysis from "./dashboard/RiskAnalysis";
@@ -8,14 +9,27 @@ import NewsSection from "./dashboard/NewsSection";
 import TechnicalLevels from "./dashboard/TechnicalLevels";
 import AIPredictions from "./dashboard/AIPredictions";
 import FinancialDocuments from "./dashboard/FinancialDocuments";
+import DemoCallout from "./DemoCallout";
 import { Loader2 } from "lucide-react";
 
 interface StockDashboardProps {
     selectedStock: string | null;
+    onLoginAsDemo: () => void;
 }
 
-const StockDashboard: React.FC<StockDashboardProps> = ({ selectedStock }) => {
+const StockDashboard: React.FC<StockDashboardProps> = ({
+    selectedStock,
+    onLoginAsDemo,
+}) => {
     const { data, loading, error } = useStockData(selectedStock);
+    const [isAuth, setIsAuth] = useState(isAuthenticated());
+
+    useEffect(() => {
+        const unsubscribe = subscribeAuth(() => {
+            setIsAuth(isAuthenticated());
+        });
+        return () => unsubscribe();
+    }, []);
 
     if (!selectedStock) {
         return (
@@ -57,8 +71,16 @@ const StockDashboard: React.FC<StockDashboardProps> = ({ selectedStock }) => {
         );
     }
 
+    // Check if we are showing demo data and the user is not authenticated
+    const isDemoMode = data.symbol.includes("(Demo)");
+    console.log(data);
+    console.log(isAuth);
+
     return (
         <div className="space-y-8">
+            {isDemoMode && !isAuth && (
+                <DemoCallout onLoginAsDemo={onLoginAsDemo} />
+            )}
             {/* Stock Overview - Always show if we have basic data */}
             {hasData(data.overview) && (
                 <StockOverview
